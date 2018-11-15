@@ -22,7 +22,8 @@ jobs:
 #          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Run Tests
-          command: kotlinApp/gradlew lint test
+          command: cd kotlinApp
+          command: ./gradlew lint test
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: reports
