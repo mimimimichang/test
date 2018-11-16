@@ -34,7 +34,11 @@ jobs:
           name: Run ktint
           command: |
                    git clone --depth 1 git@github.com:mimimimichang/tools.git
-                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=checkstyle,output=kotlinApp/Application/build/reports/ktlint.xm
+                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=checkstyle,output=kotlinApp/Application/build/reports/ktlint.xml
+      - run:
+          name: Run detekt
+          command: |
+                   java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar  -i kotlinApp/Application/src -r xml:kotlinApp/Application/build/reports/detekt.xml --debug --parallel
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: reports
