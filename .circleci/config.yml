@@ -24,7 +24,17 @@ jobs:
           name: Run Tests
           command: |
                    cd kotlinApp
-                   ./gradlew lint test
+                   ./gradlew test
+      - run:
+          name: Run Android Lint
+          command: |
+                   cd kotlinApp
+                   ./gradlew lint
+      - run:
+          name: Run ktint
+          command: |
+                   git clone --depth 1 git@github.com:mimimimichang/tools.git
+                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=checkstyle,output=kotlinApp/Application/build/reports/ktlint.xm
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: reports
