@@ -45,7 +45,7 @@ jobs:
       - run:
           name: Run checkstyle
           command: |
-                   java -jar tools/checkstyle/checkstyle-8.13-all.jar -c /google_checks.xml -f html -o Application/build/reports/checkstyle.html -d Application/src/main/java
+                   java -jar tools/checkstyle/checkstyle-8.13-all.jar -c /google_checks.xml -f plain -o Application/build/reports/checkstyle.txt -d Application/src/main/java
           when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
