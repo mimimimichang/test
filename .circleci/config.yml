@@ -49,6 +49,7 @@ jobs:
                    cd Application
                    ../gradlew --info build
           when: always
+      - run:
           name: Run Tests(Java)
           command: |
                    cd Application
