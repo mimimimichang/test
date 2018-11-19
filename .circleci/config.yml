@@ -72,7 +72,7 @@ jobs:
                    #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -auxclasspath ${CLASSES} -V
                    tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R category/java/bestpractices.xml,category/java/codestyle.xml,category/java/design.xml,category/java/documentation.xml,category/java/errorprone.xml,category/java/multithreading.xml,category/java/performance.xml,category/java/security.xml -V
           when: always
-       - run:
+      - run:
           name: Run spotbugs
           command: |
                    java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
