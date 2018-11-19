@@ -21,13 +21,13 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
       - run:
-          name: Run Tests
+          name: Run Tests(Kotlin)
           command: |
                    cd kotlinApp
                    ./gradlew --info test
           when: always
       - run:
-          name: Run Android Lint
+          name: Run Android Lint(Kotlin)
           command: |
                    cd kotlinApp
                    ./gradlew --info lint
@@ -44,12 +44,12 @@ jobs:
                    java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
           when: always
       - run:
-          name: Run Tests
+          name: Run Tests(Java)
           command: |
                    ./gradlew --info test
           when: always
       - run:
-          name: Run Android Lint
+          name: Run Android Lint(Java)
           command: |
                    ./gradlew --info lint
           when: always
@@ -57,6 +57,20 @@ jobs:
           name: Run checkstyle
           command: |
                    java -jar tools/checkstyle/checkstyle-8.13-all.jar -c /google_checks.xml -f plain -o Application/build/reports/checkstyle.txt -d Application/src/main/java
+          when: always
+      - run:
+          name: Run pmd
+          command: |
+                   PMD_RULESET=category/java/bestpractices.xml,\
+                               category/java/codestyle.xml,\
+                               category/java/design.xml,\
+                               category/java/documentation.xml,\
+                               category/java/errorprone.xml,\
+                               category/java/multithreading.xml,\
+                               category/java/performance.xml,\
+                               category/java/security.xml
+                   #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -auxclasspath ${CLASSES} -V
+                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -V
           when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
