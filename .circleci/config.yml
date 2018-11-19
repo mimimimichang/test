@@ -24,12 +24,13 @@ jobs:
           name: Run Tests
           command: |
                    cd kotlinApp
-                   ./gradlew test
+                   ./gradlew --info test
+          when: always
       - run:
           name: Run Android Lint
           command: |
                    cd kotlinApp
-                   ./gradlew lint
+                   ./gradlew --info lint
           when: always
       - run:
           name: Run ktint
@@ -43,12 +44,27 @@ jobs:
                    java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
           when: always
       - run:
+          name: Run Tests
+          command: |
+                   ./gradlew --info test
+          when: always
+      - run:
+          name: Run Android Lint
+          command: |
+                   ./gradlew --info lint
+          when: always
+      - run:
           name: Run checkstyle
           command: |
                    java -jar tools/checkstyle/checkstyle-8.13-all.jar -c /google_checks.xml -f plain -o Application/build/reports/checkstyle.txt -d Application/src/main/java
           when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
-          destination: reports
+          destination: kotlin_reports
+      - store_artifacts:
+          path: Application/build/reports
+          destination: java_reports
       - store_test_results:
           path: kotlinApp/Application/build/test-results
+      - store_test_results:
+          path: Application/build/test-results
