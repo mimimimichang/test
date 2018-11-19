@@ -70,7 +70,8 @@ jobs:
                                category/java/performance.xml,\
                                category/java/security.xml
                    #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -auxclasspath ${CLASSES} -V
-                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -V
+                   #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -V
+                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -V
           when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
