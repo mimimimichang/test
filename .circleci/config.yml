@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
 #      - run:
 #         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
 #         command: sudo chmod +x ./gradlew
@@ -19,13 +19,71 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
       - run:
-          name: Run Tests
-          command: ./gradlew lint test
+          name: Run Tests(Kotlin)
+          command: |
+                   cd kotlinApp
+                   ./gradlew --info test
+          when: always
+      - run:
+          name: Run Android Lint(Kotlin)
+          command: |
+                   cd kotlinApp
+                   ./gradlew --info lint
+          when: always
+      - run:
+          name: Run ktint
+          command: |
+                   git clone --depth 1 git@github.com:mimimimichang/tools.git
+                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=plain,output=kotlinApp/Application/build/reports/ktlint.txt
+          when: always
+      - run:
+          name: Run detekt
+          command: |
+                   java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
+          when: always
+      - run:
+          name: Run Build(Java)
+          command: |
+                   cd Application
+                   ../gradlew --info build
+          when: always
+      - run:
+          name: Run Tests(Java)
+          command: |
+                   cd Application
+                   ../gradlew --info test
+          when: always
+      - run:
+          name: Run Android Lint(Java)
+          command: |
+                   cd Application
+                   ../gradlew --info lint
+          when: always
+      - run:
+          name: Run checkstyle
+          command: |
+                   java -jar tools/checkstyle/checkstyle-8.13-all.jar -c /google_checks.xml -f plain -o Application/build/reports/checkstyle.txt -d Application/src/main/java
+          when: always
+      - run:
+          name: Run pmd
+          command: |
+                   #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -auxclasspath ${CLASSES} -V
+                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R category/java/bestpractices.xml,category/java/codestyle.xml,category/java/design.xml,category/java/documentation.xml,category/java/errorprone.xml,category/java/multithreading.xml,category/java/performance.xml,category/java/security.xml -V
+          when: always
+      - run:
+          name: Run spotbugs
+          command: |
+                   java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
+          when: always
       - store_artifacts:
-          path: app/build/reports
-          destination: reports
+          path: kotlinApp/Application/build/reports
+          destination: kotlin_reports
+      - store_artifacts:
+          path: Application/build/reports
+          destination: java_reports
       - store_test_results:
-          path: app/build/test-results
-#
+          path: kotlinApp/Application/build/test-results
+      - store_test_results:
+          path: Application/build/test-results
