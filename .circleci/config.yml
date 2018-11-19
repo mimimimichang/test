@@ -83,6 +83,11 @@ jobs:
                    cd sample4spek
                    ./gradlew --info test
           when: always
+      - run:
+          name: Run jacoco
+          command: |
+                   java -jar tools/jacoco/jacococli.jar report sample4spek/build/**/**.exec --classfiles sample4spek/build/classes/**/main --html sample4spek/build/reports/coverage --sourcefiles sample4spek/src/main/**/**.kt
+          when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: kotlin_reports
