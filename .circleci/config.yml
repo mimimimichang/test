@@ -77,13 +77,24 @@ jobs:
           command: |
                    java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
           when: always
+      - run:
+          name: Run spek
+          command: |
+                   cd sample4spek
+                   ./gradlew --info test
+          when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: kotlin_reports
       - store_artifacts:
           path: Application/build/reports
           destination: java_reports
+      - store_artifacts:
+          path: sample4spek/build/reports
+          destination: soek_reports
       - store_test_results:
           path: kotlinApp/Application/build/test-results
       - store_test_results:
           path: Application/build/test-results
+      - store_test_results:
+          path: sample4spek/build/test-results
