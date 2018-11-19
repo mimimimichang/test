@@ -44,14 +44,21 @@ jobs:
                    java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
           when: always
       - run:
+          name: Run Build(Java)
+          command: |
+                   cd Application
+                   ../gradlew --info build
+          when: always
           name: Run Tests(Java)
           command: |
-                   ./gradlew --info test
+                   cd Application
+                   ../gradlew --info test
           when: always
       - run:
           name: Run Android Lint(Java)
           command: |
-                   ./gradlew --info lint
+                   cd Application
+                   ../gradlew --info lint
           when: always
       - run:
           name: Run checkstyle
