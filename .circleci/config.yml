@@ -61,18 +61,16 @@ jobs:
       - run:
           name: Run pmd
           command: |
-                   PMD_RULESET=category/java/bestpractices.xml,\
+                   PMD_RULESET="category/java/bestpractices.xml,\
                                category/java/codestyle.xml,\
                                category/java/design.xml,\
                                category/java/documentation.xml,\
                                category/java/errorprone.xml,\
                                category/java/multithreading.xml,\
                                category/java/performance.xml,\
-                               category/java/security.xml
+                               category/java/security.xml"
                    #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -auxclasspath ${CLASSES} -V
-                   #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -V
-                   #tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -V
-                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R category/java/bestpractices.xml -V
+                   tools/pmd/bin/run.sh pmd -d Application/src/main/java -f html -r Application/build/reports/pmd.html -l java -R ${PMD_RULESET} -V
           when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
