@@ -20,12 +20,12 @@ jobs:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
-      - run:
-          name: Run Tests(Kotlin)
-          command: |
-                   cd kotlinApp
-                   ./gradlew --info test
-          when: always
+#      - run:
+#          name: Run Tests(Kotlin)
+#          command: |
+#                   cd kotlinApp
+#                   ./gradlew --info test
+#          when: always
       - run:
           name: Run Android Lint(Kotlin)
           command: |
@@ -49,12 +49,12 @@ jobs:
                    cd Application
                    ../gradlew --info build
           when: always
-      - run:
-          name: Run Tests(Java)
-          command: |
-                   cd Application
-                   ../gradlew --info test
-          when: always
+ #     - run:
+ #         name: Run Tests(Java)
+ #         command: |
+ #                  cd Application
+ #                  ../gradlew --info test
+ #         when: always
       - run:
           name: Run Android Lint(Java)
           command: |
@@ -77,13 +77,29 @@ jobs:
           command: |
                    java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
           when: always
+      - run:
+          name: Run spek
+          command: |
+                   cd sample4spek
+                   ./gradlew --info test
+          when: always
+      - run:
+          name: Run jacoco
+          command: |
+                   java -jar tools/jacoco/jacococli.jar report sample4spek/build/**/**.exec --classfiles sample4spek/build/classes/**/main --html sample4spek/build/reports/coverage --sourcefiles sample4spek/src/main/**/**.kt
+          when: always
       - store_artifacts:
           path: kotlinApp/Application/build/reports
           destination: kotlin_reports
       - store_artifacts:
           path: Application/build/reports
           destination: java_reports
+      - store_artifacts:
+          path: sample4spek/build/reports
+          destination: spek_reports
       - store_test_results:
           path: kotlinApp/Application/build/test-results
       - store_test_results:
           path: Application/build/test-results
+      - store_test_results:
+          path: sample4spek/build/test-results
