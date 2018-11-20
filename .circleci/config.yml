@@ -21,12 +21,6 @@ jobs:
           name: Checkout tools
           command: |
                    git clone --depth 1 git@github.com:mimimimichang/tools.git
-      - run:
-          name: Run Build(Java)
-          command: |
-                   cd Application
-                   ../gradlew --info build
-                   exit 0
       - persist_to_workspace:
           root: .
           paths:
@@ -40,6 +34,11 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - run:
+          name: Run Build(Java)
+          command: |
+                   cd Application
+                   ../gradlew --info build
       - run:
           name: Run Android Lint(Java)
           command: |
