@@ -10,9 +10,6 @@ jobs:
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
-#      - run:
-#         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
-#         command: sudo chmod +x ./gradlew
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
@@ -20,41 +17,28 @@ jobs:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
-#      - run:
-#          name: Run Tests(Kotlin)
-#          command: |
-#                   cd kotlinApp
-#                   ./gradlew --info test
-#          when: always
       - run:
-          name: Run Android Lint(Kotlin)
-          command: |
-                   cd kotlinApp
-                   ./gradlew --info lint
-          when: always
-      - run:
-          name: Run ktint
-          command: |
+          name: Checkout tools
+      command: |
                    git clone --depth 1 git@github.com:mimimimichang/tools.git
-                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=plain,output=kotlinApp/Application/build/reports/ktlint.txt
-          when: always
-      - run:
-          name: Run detekt
-          command: |
-                   java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
-          when: always
       - run:
           name: Run Build(Java)
           command: |
                    cd Application
                    ../gradlew --info build
-          when: always
- #     - run:
- #         name: Run Tests(Java)
- #         command: |
- #                  cd Application
- #                  ../gradlew --info test
- #         when: always
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  analyze_java:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Run Android Lint(Java)
           command: |
@@ -77,6 +61,18 @@ jobs:
           command: |
                    java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
           when: always
+      - store_artifacts:
+          path: Application/build/reports
+          destination: java_reports
+  test_java:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Run junit
           command: |
@@ -88,6 +84,48 @@ jobs:
           command: |
                    java -jar tools/jacoco/jacococli.jar report sample4junit/build/**/**.exec --classfiles sample4junit/build/classes/**/main --html sample4junit/build/reports/coverage --sourcefiles sample4junit/src/main/**/**.java
           when: always
+      - store_artifacts:
+          path: sample4junit/build/reports
+          destination: junit_reports
+      - store_test_results:
+          path: sample4junit/build/test-results
+  analyze_kotlin:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Run Android Lint(Kotlin)
+          command: |
+                   cd kotlinApp
+                   ./gradlew --info lint
+          when: always
+      - run:
+          name: Run ktint
+          command: |
+                   tools/ktlint/ktlint kotlinApp/Application/src/**/*.kt --reporter=plain,output=kotlinApp/Application/build/reports/ktlint.txt
+          when: always
+      - run:
+          name: Run detekt
+          command: |
+                   java -jar tools/detekt/detekt-cli-1.0.0.RC9-all.jar -i kotlinApp/Application/src -r html:kotlinApp/Application/build/reports/detekt.html --debug --parallel
+          when: always
+      - store_artifacts:
+          path: kotlinApp/Application/build/reports
+          destination: kotlin_reports
+  test_kotlin:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-28-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Run spek
           command: |
@@ -100,22 +138,24 @@ jobs:
                    java -jar tools/jacoco/jacococli.jar report sample4spek/build/**/**.exec --classfiles sample4spek/build/classes/**/main --html sample4spek/build/reports/coverage --sourcefiles sample4spek/src/main/**/**.kt
           when: always
       - store_artifacts:
-          path: kotlinApp/Application/build/reports
-          destination: kotlin_reports
-      - store_artifacts:
-          path: Application/build/reports
-          destination: java_reports
-      - store_artifacts:
-          path: sample4junit/build/reports
-          destination: junit_reports
-      - store_artifacts:
           path: sample4spek/build/reports
           destination: spek_reports
-#      - store_test_results:
-#          path: kotlinApp/Application/build/test-results
-#      - store_test_results:
-#          path: Application/build/test-results
-      - store_test_results:
-          path: sample4junit/build/test-results
       - store_test_results:
           path: sample4spek/build/test-results
+workflows:
+  version: 2
+  build_and_analyze_and_test:
+    jobs:
+      - build
+      - analyze_java:
+          requires:
+            - build
+      - test_java:
+          requires:
+            - build
+      - analyze_kotlin:
+          requires:
+            - build
+      - test_kotlin:
+          requires:
+            - build
