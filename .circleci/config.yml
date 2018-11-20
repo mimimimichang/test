@@ -78,13 +78,24 @@ jobs:
                    java -jar tools/spotbugs/spotbugs.jar -textui -low -html -output Application/build/reports/spotbugs.html -auxclasspath Application/build/intermediates/javac Application/build/intermediates
           when: always
       - run:
+          name: Run junit
+          command: |
+                   cd sample4junit
+                   ./gradlew --info test
+          when: always
+      - run:
+          name: Run jacoco(junit)
+          command: |
+                   java -jar tools/jacoco/jacococli.jar report sample4junit/build/**/**.exec --classfiles sample4junit/build/classes/**/main --html sample4junit/build/reports/coverage --sourcefiles sample4junit/src/main/**/**.java
+          when: always
+      - run:
           name: Run spek
           command: |
                    cd sample4spek
                    ./gradlew --info test
           when: always
       - run:
-          name: Run jacoco
+          name: Run jacoco(spek)
           command: |
                    java -jar tools/jacoco/jacococli.jar report sample4spek/build/**/**.exec --classfiles sample4spek/build/classes/**/main --html sample4spek/build/reports/coverage --sourcefiles sample4spek/src/main/**/**.kt
           when: always
@@ -95,11 +106,16 @@ jobs:
           path: Application/build/reports
           destination: java_reports
       - store_artifacts:
+          path: sample4junit/build/reports
+          destination: junit_reports
+      - store_artifacts:
           path: sample4spek/build/reports
           destination: spek_reports
+#      - store_test_results:
+#          path: kotlinApp/Application/build/test-results
+#      - store_test_results:
+#          path: Application/build/test-results
       - store_test_results:
-          path: kotlinApp/Application/build/test-results
-      - store_test_results:
-          path: Application/build/test-results
+          path: sample4junit/build/test-results
       - store_test_results:
           path: sample4spek/build/test-results
