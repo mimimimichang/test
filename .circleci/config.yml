@@ -19,7 +19,7 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "Application/build.gradle" }}
       - run:
           name: Checkout tools
-      command: |
+          command: |
                    git clone --depth 1 git@github.com:mimimimichang/tools.git
       - run:
           name: Run Build(Java)
